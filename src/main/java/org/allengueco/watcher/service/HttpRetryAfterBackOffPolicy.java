@@ -9,14 +9,12 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 
 
 public class HttpRetryAfterBackOffPolicy implements BackOffPolicy {
     private static final Logger log = LoggerFactory.getLogger(HttpRetryAfterBackOffPolicy.class);
-    private Sleeper sleeper = new ThreadWaitSleeper();
-
+    private final Sleeper sleeper = new ThreadWaitSleeper();
     @Override public BackOffContext start(RetryContext context) {
         return new RetryAfterBackOffContext(context);
     }
@@ -26,7 +24,7 @@ public class HttpRetryAfterBackOffPolicy implements BackOffPolicy {
         final RetryAfterBackOffContext context = (RetryAfterBackOffContext) backOffContext;
 
         Long backOffPeriod = tryGetBackOffPeriod(context.getRetryContext().getLastThrowable())
-                .orElse(1000L);
+                .orElse(1_000L);
 
         try {
             sleeper.sleep(backOffPeriod);

@@ -52,6 +52,10 @@ tasks.test {
     outputs.dir(project.extra["snippetsDir"]!!)
 }
 
+tasks.bootRun {
+    jvmArgs = listOf("-Dspring.output.ansi.enabled=ALWAYS")
+}
+
 tasks.asciidoctor {
     inputs.dir(project.extra["snippetsDir"]!!)
     dependsOn(tasks.test)

@@ -3,8 +3,6 @@ package org.allengueco.watcher.controller;
 import org.allengueco.watcher.extractors.MatchSummonerPerformance;
 import org.allengueco.watcher.model.Summoner;
 import org.allengueco.watcher.model.match.Match;
-import org.allengueco.watcher.service.AccountApi;
-import org.allengueco.watcher.service.MatchApi;
 import org.allengueco.watcher.service.WatcherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,18 +1,24 @@
 package org.allengueco.watcher.config;
 
 import org.allengueco.watcher.service.AccountApi;
+import org.allengueco.watcher.service.HttpRetryAfterBackOffPolicy;
 import org.allengueco.watcher.service.MatchApi;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.retry.support.RetryTemplateBuilder;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @Configuration
+@EnableRetry
 public class RiotApiConfig {
+    private static final Logger log = LoggerFactory.getLogger(RiotApiConfig.class);
     WatcherConfiguration watcherConfiguration;
 
     RiotApiConfig(final WatcherConfiguration watcherConfiguration) {
@@ -20,11 +26,24 @@ public class RiotApiConfig {
     }
 
     @Bean
-    RestClient riotRestClient() {
+    RestClient riotRestClient(ClientHttpRequestInterceptor rateLimitingInterceptor) {
         return RestClient.builder()
                 .baseUrl("https://americas.api.riotgames.com/")
+                .requestInterceptor(rateLimitingInterceptor)
                 .defaultHeaders(headers -> headers.add("X-Riot-Token", watcherConfiguration.apiKey()))
                 .build();
+    }
+
+    @Bean
+    ClientHttpRequestInterceptor rateLimitingInterceptor(RetryTemplate retryTemplate) {
+        return (request, body, execution) -> retryTemplate.execute(context -> execution.execute(request, body));
+    }
+
+    @Bean
+    RetryTemplate retryTemplate() {
+        HttpRetryAfterBackOffPolicy backOffPolicy = new HttpRetryAfterBackOffPolicy();
+        
+        return new RetryTemplateBuilder().customBackoff(backOffPolicy).build();
     }
 
     @Bean
