@@ -42,7 +42,7 @@ public class RiotApiConfig {
     @Bean
     RetryTemplate retryTemplate() {
         HttpRetryAfterBackOffPolicy backOffPolicy = new HttpRetryAfterBackOffPolicy();
-        
+
         return new RetryTemplateBuilder().customBackoff(backOffPolicy).build();
     }
 
@@ -60,6 +60,5 @@ public class RiotApiConfig {
     MatchApi matchApi(HttpServiceProxyFactory riotHttpServiceProxyFactory) {
         return riotHttpServiceProxyFactory.createClient(MatchApi.class);
     }
-
 
 }
